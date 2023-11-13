@@ -1,0 +1,3 @@
+[submodule "simplerecon"]
+	path = simplerecon
+	url = https://gitlab.saicny.com/saic-ny/perception/simplerecon.git
