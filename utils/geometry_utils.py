@@ -28,9 +28,9 @@ def emulate_lidar_hitpts(pcd, w_T_cams, axis_aligned_T_w, m2f_seg, vacuum_height
     emulate Lidar hit points 
     :param pcd: reconstructed point cloud in the original frame, usually the first camera frame
     :type pcd: o3d.geometry.PointCloud
-    :param w_T_cams: (M,4,4), downsampled camera poses from the video, used to downproject to RVC height for ray casting
+    :param w_T_cams: size[M,4,4], downsampled camera poses from the video, used to downproject to RVC height for ray casting
     :param axis_aligned_T_w: the estimated 4x4 transformation to transform reconstructed scene to a frame with z-axis pointing up
-    :param m2f_seg: (N,) segmentation labels for the reconstructed point cloud, used for filter out floor points, 
+    :param m2f_seg: size[N,] segmentation labels for the reconstructed point cloud, used for filter out floor points, 
                             if none, filter out floor points with height
     :param vacuum_height: predefined height for emulating LiDAR hit points, defaults to 0.15
     :param cams_used_ray_cast: to specify which cams to use for ray casting, defaults to None, optional
@@ -116,3 +116,17 @@ def emulate_lidar_hitpts(pcd, w_T_cams, axis_aligned_T_w, m2f_seg, vacuum_height
             cam_lidar_2d_seg = np.append(cam_lidar_2d_seg, hit_pts_labels)
     return cam_lidar_2d, cam_lidar_2d_seg, pts_2d_all_w, pts_2d_all_w_seg, w_T_vacuums, cams_used_ray_cast
 
+def keypoints_to_spheres(keypoints0, radius=0.01):
+    '''
+    convert keypoints to open3d sphere
+    :param keypoints0: size[N,3]
+    :param radius: radius of sphere, defaults to 0.01
+    '''
+    spheres = o3d.geometry.TriangleMesh()
+    for i in range(keypoints0.shape[0]):
+        color = np.random.rand(3)
+        sphere = o3d.geometry.TriangleMesh.create_sphere(radius=radius)
+        sphere.translate(keypoints0[i])
+        sphere.paint_uniform_color(color)
+        spheres += sphere
+    return spheres
