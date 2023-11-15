@@ -15,3 +15,16 @@ Download the `hero_model` weight from [Simplerecon](https://github.com/nianticla
 Path to the weight should look like:<br />
 `./simplerecon/weights/hero_model.ckpt`<br />
 
+### Quick start:
+We provide both RGBD and posed-RGB sample data.<br />
+To start with RGBD sample, unzip `viola_sample_data.zip`<br />
+Run the following for preprosseing (Open3d reconstruction + semantic point cloud prediction with Mask2Former):<br />
+```
+cd preprocess/
+python redwood_open3d_m2f.py --data_path <path to /viola_sample/redwood/loft_short> --open3d_path <path to open3d> --m2f_path ./mask2former --skip_every_n_frames 15
+```
+After preprosseing, run:<br />
+```
+cd ..
+python run_redwood.py --data_path <path to /viola_sample/redwood/loft_short> --lidar_path <path to /viola_sample/redwood/loft_lidar_dense.mat>
+```
