@@ -28,11 +28,6 @@ def pose_optimization(template_2d, partial_2d, init_poses, iterations=180):
     est_4D = est_4D.detach().requires_grad_().cuda()
     optimizer = optim.Adam([est_4D],lr=0.1)  
     scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[50,100,150], gamma=0.5)
-    T_vis = {}
-    T_vis['partial_2d'] = partial_2d
-    T_vis['template_2d'] = template_2d
-    #T_vis['T_intermediate'] = T_intermediate
-    #np.save(f'{path}/{seq_name}_2D_points.npy',T_vis)
     print('optimization...')
     for it in range(iterations):
         optimizer.zero_grad()
@@ -108,6 +103,19 @@ def viola_matching(data, template_2d, init_method='grid', vis=False):
     result['partial_2d'] = partial_2d
     return result
 
+def scene_completion_decision(result, rot_tr=20, t_tr=0.3, l_tr=20):
+    sorted_pose_idx = np.argsort(result['final_losses'])
+    best_pose_loss = result['final_losses'][sorted_pose_idx[0]]
+    best_pose = result['final_poses'][sorted_pose_idx[0]]
+    for i in range(sorted_pose_idx.shape[0]):
+        rot_diff, t_diff = optimization_utils.rot_err_2d(result['final_poses'][sorted_pose_idx[i]], best_pose)
+        if rot_diff>rot_tr or t_diff>rot_tr:
+            second_pose_loss = result['final_losses'][sorted_pose_idx[i]]
+            use_inpaint = True if abs(second_pose_loss-best_pose_loss) < l_tr else  False
+            break
+    return use_inpaint
+    
+
 def get_parser():
     parser = argparse.ArgumentParser(description=" ")
     parser.add_argument(
@@ -177,6 +185,6 @@ if __name__ == "__main__":
     import pdb;pdb.set_trace()
     
     ## scene completion via inpainting
-    if args.scene_completion_activation!='off':
-        raise NotImplementedError #TODO
+    if args.scene_completion_activation=='on' or (args.scene_completion_activation=='criterion' and scene_completion_decision(result)):
+        raise NotImplementedError #TODO: inpainting module
         
