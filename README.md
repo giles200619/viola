@@ -1,5 +1,24 @@
 # viola
 
+To get started, clone the repository and initialize the submodules:
+
+```
+git clone https://gitlab.saicny.com/saic-ny/perception/viola.git
+cd viola
+git submodule update --init --recursive
+```
+
+We recommend creating a new virtual environment. After activating the virtual environment, install pytorch, pytorch3d and other required packages:
+
+```
+conda create -n viola python=3.9
+conda activate viola
+conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
+conda install -c fvcore -c iopath -c conda-forge fvcore iopath
+pip install "git+https://github.com/facebookresearch/pytorch3d.git@stable"
+pip install -r requirements.txt
+```
+
 
 ### Submodules:
 #### Open3D

@@ -1,0 +1,10 @@
+imageio==2.31.1
+matplotlib==3.7.2  
+numpy==1.25.1
+open3d==0.17.0
+opencv-python==4.6.0.66
+Pillow==9.4.0
+plotly==5.15.0
+scipy==1.11.1
+tqdm==4.65.0
+scikit-image==0.21.0
