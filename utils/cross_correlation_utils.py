@@ -10,6 +10,7 @@ import argparse
 import sys
 sys.path.append('./')
 
+
 def get_cross_correlation_matches(partial_2d: np.ndarray,
                                   template_2d: np.ndarray,
                                   nms: bool = False,
@@ -52,29 +53,18 @@ def get_cross_correlation_matches(partial_2d: np.ndarray,
     res_bests = np.stack(res_bests)
     max_locs_all = np.stack(max_locs_all)
 
-    # import pdb; pdb.set_trace()
     tls = max_locs_all.reshape(-1, 2)
     all_sizes = im_sizes[:, None].repeat(k_at_each_angle, -1).reshape(-1)
     brs = tls + all_sizes[:, None]
     boxes = np.hstack((tls, brs))
 
-    # # Get the indices of best 100
-    # inds = k_largest_index_argsort(res_bests, 100)
-    # tls = max_locs_all[inds[:, 0], inds[:, 1]]
-    # brs = tls + im_sizes[inds[:, 0]][:, None]
-    # boxes = np.hstack((tls, brs))
     boxes, nms_inds = non_max_suppression_fast(boxes, 0.75)
     nms_inds_np = np.array(nms_inds)
     angle_inds = nms_inds_np // k_at_each_angle
 
-    # if nms:
-    #     boxes, nms_inds = non_max_suppression_fast(boxes, 0.9)
-    #     inds = inds[nms_inds]
-
     pred_tforms = []
 
     for box, ix in zip(boxes, angle_inds):
-        # rot_angle = rot_angles_deg[ix[0]]
         rot_angle = rot_angles_deg[ix]
         partial_pts = partial_2d @ R.from_euler('z', rot_angle, degrees=True).as_matrix().T
 
@@ -83,7 +73,6 @@ def get_cross_correlation_matches(partial_2d: np.ndarray,
         tl = tl.astype(int)
         br = br.astype(int)
         im_size = br[0] - tl[0]
-        # assert (tl == max_locs_all[ix[0], ix[1]]).all()
 
         if vis_images:
             partial_im_uint = image_from_points(partial_pts)
@@ -112,53 +101,6 @@ def get_cross_correlation_matches(partial_2d: np.ndarray,
 
     return pred_tforms_np
 
-
-def get_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--data_path', type=str, default='redwood_processed/apartment_long_0.mat')
-    parser.add_argument('--vis3d', action='store_true')
-    parser.add_argument('--vis_images', action='store_true')
-    parser.add_argument('--nms', action='store_true')
-
-    return parser.parse_args()
-
-
-def main():
-    args = get_args()
-    data = loadmat(args.data_path)
-    print('Processing...', args.data_path)
-
-    partial_2d = data['partial_2d']
-    template_2d = data['template_2d']
-
-    # Position and orientation error bounds for successful runs
-    error_bound_pos = 0.5  # [m]
-    error_bound_ori = 10  # [deg]
-    error_bound = np.array([error_bound_pos, error_bound_ori])
-
-    # Position and orientation errors
-    errors = []
-
-    pred_tforms = get_cross_correlation_matches(partial_2d, template_2d, args.nms, args.vis_images)
-
-    for pred_tform in pred_tforms:
-
-        pred_rot = np.eye(3)
-        pred_rot[:2, :2] = pred_tform[:2, :2]
-        pred_ori = R.from_matrix(pred_rot).as_euler('xyz')[-1] * 180 / np.pi % 360
-
-        gt_rot = np.eye(3)
-        gt_rot[:2, :2] = data['gt_pose_2d'][:2, :2]
-        gt_ori = R.from_matrix(gt_rot).as_euler('xyz')[-1] * 180 / np.pi % 360
-        ori_error = abs((gt_ori - pred_ori + 180) % 360 - 180)
-
-        pred_trans = pred_tform[:2, -1]
-        pos_error = np.linalg.norm(data['gt_pose_2d'][:2, -1] - pred_trans)
-
-        error_i = [pos_error, ori_error]
-        errors.append(error_i)
-
-    print('Any successful:', (np.stack(errors) < error_bound).all(-1).any())
 
 def k_largest_index_argsort(a, k):
     idx = np.argsort(a.ravel())[:-k-1:-1]
@@ -236,6 +178,3 @@ def non_max_suppression_fast(boxes, overlapThresh):
                                                np.where(overlap > overlapThresh)[0])))
     # return only the bounding boxes that were picked using the
     return boxes[pick].astype("int"), pick
-
-if __name__ == "__main__":
-    main()
