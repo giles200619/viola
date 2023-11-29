@@ -17,6 +17,7 @@ conda create -n viola python=3.9
 conda activate viola
 conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
 conda install -c fvcore -c iopath -c conda-forge fvcore iopath
+conda install lightning -c conda-forge
 pip install "git+https://github.com/facebookresearch/pytorch3d.git@stable"
 pip install -r requirements.txt
 ```
