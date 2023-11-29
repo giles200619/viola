@@ -26,9 +26,18 @@ pip install -r requirements.txt
 ### Thirdparty modules:
 #### Open3D
 VioLA uses the RGBD reconstruction pipeline from [Open3D](https://github.com/isl-org/Open3D) v0.17.0<br />
-Clone the Open3D project and modify the `--open3d_path` in `preprocess/redwood_open3d_m2f.py` accordingly
+Clone the Open3D repository and modify the `--open3d_path` in `preprocess/redwood_open3d_m2f.py` accordingly
+```
+git clone https://github.com/isl-org/Open3D.git
+```
+
 #### Mask2Former
 Download Mask2Former model weight from their [Model zoo](https://github.com/facebookresearch/Mask2Former/blob/main/MODEL_ZOO.md), in this project we are using model id: 47429163_0<br />
+```
+mkdir mask2former/model_weights
+wget https://dl.fbaipublicfiles.com/maskformer/mask2former/coco/panoptic/maskformer2_swin_large_IN21k_384_bs16_100ep/model_final_f07440.pkl -P mask2former/model_weights
+```
+
 The path to the model weight should look like:<br />
 `./mask2former/model_weights/model_final_47429163_0.pkl`<br />
 
@@ -62,7 +71,7 @@ To start, first run the following for preprosseing (Open3d reconstruction + sema
 cd preprocess/
 python redwood_open3d_m2f.py --data_path <path to viola_sample/redwood/loft_short> --open3d_path <path to open3d> --m2f_path ./mask2former --skip_every_n_frames 15
 ```
-Not that this preprocessing can take some time, to speed up, one can optionally pass in the key `--no_aug` to disable image augmentation before semantic segmentation. In addition, increaseing `--skip_every_n_frames` can reduce the number of key frames. However, these could hurt the semantic segmentation performance.<br />
+Not that this preprocessing can take some time, to speed up, one can optionally pass in the key `--no_aug` to disable image augmentation before semantic segmentation. In addition, increasing `--skip_every_n_frames` can reduce the number of key frames. However, these could hurt the semantic segmentation performance.<br />
 After preprosseing, run:<br />
 ```
 cd ..
