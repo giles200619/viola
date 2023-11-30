@@ -19,7 +19,7 @@ conda install pytorch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 pytorch-cuda=
 conda install -c fvcore -c iopath -c conda-forge fvcore iopath
 conda install pytorch3d -c pytorch3d
 conda install lightning -c conda-forge
-pip install -r requirements2.txt
+pip install -r requirements.txt
 ```
 
 
