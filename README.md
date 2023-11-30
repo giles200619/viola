@@ -15,11 +15,11 @@ We recommend creating a new virtual environment. After activating the virtual en
 ```
 conda create -n viola python=3.9
 conda activate viola
-conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
+conda install pytorch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 pytorch-cuda=11.8 -c pytorch -c nvidia
 conda install -c fvcore -c iopath -c conda-forge fvcore iopath
+conda install pytorch3d -c pytorch3d
 conda install lightning -c conda-forge
-pip install "git+https://github.com/facebookresearch/pytorch3d.git@stable"
-pip install -r requirements.txt
+pip install -r requirements2.txt
 ```
 
 
@@ -41,7 +41,13 @@ The path to the model weight should look like:<br />
 `./mask2former/model_weights/model_final_47429163_0.pkl`<br />
 The Mask2Former model uses Detectron2, to install it from source, [run](https://detectron2.readthedocs.io/en/latest/tutorials/install.html):
 ```
+conda install -c conda-forge pycocotools cudatoolkit-dev
 python -m pip install 'git+https://github.com/facebookresearch/detectron2.git'
+pip install git+https://github.com/cocodataset/panopticapi.git
+pip install git+https://github.com/mcordts/cityscapesScripts.git
+
+cd mask2former/mask2former/modeling/pixel_decoder/ops
+sh make.sh
 ```
 
 #### Simplerecon
@@ -57,6 +63,28 @@ Due to torch_lightning version difference, you might encouter missing key error 
 ```
 python ./utils/fix_hero_model_keys.py 
 ```
+#### Stable Diffusion V2
+To setup Stable Diffusion, run:<br />
+```
+git clone https://github.com/Stability-AI/stablediffusion.git
+cd stablediffusion/
+pip install -e .
+cd ..
+```
+Optionally, install [xFormers](https://github.com/facebookresearch/xformers) for speed and efficiency by following [Stable Diffusion's repo](https://github.com/Stability-AI/stablediffusion#xformers-efficient-attention).
+
+#### Pointersect
+First setup Pointersect:<br />
+```
+pip install pointersect
+```
+Then download model weight from...<br />
+
+
+#### Iron Depth
+Download model weight from...<br />
+
+
 
 ### Quick start:
 We provide both RGBD and posed-RGB sample data. Download and unzip `viola_sample_data.zip`.<br />
@@ -77,7 +105,7 @@ This example runs the full VioLA pipeline described in the main paper by first r
 To start, first run the following for preprosseing (Open3d reconstruction + semantic point cloud prediction with Mask2Former):<br />
 ```
 cd preprocess/
-python redwood_open3d_m2f.py --data_path <path to viola_sample/redwood/loft_short> --open3d_path <path to open3d> --m2f_path ./mask2former --skip_every_n_frames 15
+python redwood_open3d_m2f.py --data_path <path to viola_sample/redwood/loft_short> --open3d_path <path to open3d> --m2f_path ../mask2former --skip_every_n_frames 15
 ```
 Note that this preprocessing can take some time, to speed up, one can optionally pass in the key `--no_aug` to disable image augmentation before semantic segmentation. In addition, increasing `--skip_every_n_frames` can reduce the number of key frames. However, these could hurt the semantic segmentation performance.<br />
 After preprocessing, run:<br />
