@@ -181,4 +181,3 @@ class DepthOutpainter:
 
     def get_fused_pointcloud(self):
         return self.scene_pcd
-
