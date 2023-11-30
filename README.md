@@ -38,7 +38,7 @@ mkdir mask2former/model_weights
 wget https://dl.fbaipublicfiles.com/maskformer/mask2former/coco/panoptic/maskformer2_swin_large_IN21k_384_bs16_100ep/model_final_f07440.pkl -P mask2former/model_weights
 ```
 The path to the model weight should look like:<br />
-`./mask2former/model_weights/model_final_47429163_0.pkl`<br />
+`viola/mask2former/model_weights/model_final_47429163_0.pkl`<br />
 The Mask2Former model uses Detectron2, to install it from source, [run](https://detectron2.readthedocs.io/en/latest/tutorials/install.html):
 ```
 conda install -c conda-forge pycocotools cudatoolkit-dev
@@ -58,7 +58,7 @@ gdown https://drive.google.com/uc?id=1hCuKZjEq-AghrYAmFxJs_4eeixIlP488
 mv hero_model.ckpt simplerecon/weights/
 ```
 Path to the weight should look like:<br />
-`./simplerecon/weights/hero_model.ckpt`<br />
+`viola/simplerecon/weights/hero_model.ckpt`<br />
 Due to torch_lightning version difference, you might encouter missing key error while loading `hero_model.ckpt`. We provide a script to add missing keys to the checkpoint:<br />
 ```
 python ./utils/fix_hero_model_keys.py 
@@ -73,17 +73,11 @@ cd ..
 ```
 Optionally, install [xFormers](https://github.com/facebookresearch/xformers) for speed and efficiency by following [Stable Diffusion's repo](https://github.com/Stability-AI/stablediffusion#xformers-efficient-attention).
 
-#### Pointersect
-First setup Pointersect:<br />
-```
-pip install pointersect
-```
-Then download model weight from...<br />
-
 
 #### Iron Depth
-Download model weight from...<br />
-
+Download the model weights for the depth estimation model using the instructions in [the IronDepth repository](https://github.com/baegwangbin/IronDepth).<br />
+- Download the files `normal_scannet.pt` and `irondepth_scannet.pt`
+- Move them to the directory `viola/checkpoints`
 
 
 ### Quick start:
