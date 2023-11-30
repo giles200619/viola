@@ -17,4 +17,5 @@ tqdm==4.65.0
 trimesh
 scikit-image==0.21.0
 antialiased-cnns
+albumentations
 https://github.com/JamieWatson683/scikit-image/archive/single_mesh.zip
