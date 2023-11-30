@@ -30,14 +30,7 @@ class DepthOutpainter:
         self.im_size = im_size
         self.W, self.H = im_size
         self.vis_images = False
-        if args.__contains__('filename'):
-            filename = args.filename
-            filename = filename.split('.')[0]
-            date_now = str(datetime.now()).replace(' ', '_')
-            self.save_dir = f'results/{filename}_{date_now}'
-            os.makedirs(f'{self.save_dir}', exist_ok=True)
-        else:
-            self.save_dir = None
+
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         self.camera_T_floor = camera_T_floor
         self.setup_models()
@@ -155,12 +148,6 @@ class DepthOutpainter:
         depth_estimated_np = depth_estimated_torch.cpu().detach().numpy()
         if self.vis_images:
             get_colormap_pil(depth_estimated_np).show()
-
-        if self.save_dir is not None:
-            rendered_rgb_pil.save(f"{self.save_dir}/rgb_rendering_{self.counter}.png")
-            inpainted_rgb_pil.save(f"{self.save_dir}/rgb_inpainting_{self.counter}.png")
-            get_colormap_pil(rendered_depth_np).save(f"{self.save_dir}/depth_rendering_{self.counter}.png")
-            get_colormap_pil(depth_estimated_np).save(f"{self.save_dir}/depth_completion_{self.counter}.png")
 
         # 3D projection
         mask_np_cropped = np.asarray(mask_pil.crop((0, 0, self.W, self.H)))

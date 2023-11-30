@@ -8,7 +8,7 @@ from .inference.structures import PointCloud, Camera
 
 class PointersectInference:
     def __init__(self, im_size) -> None:
-        self.model_pth_filename = os.path.join('checkpoints/epoch700.pth')
+        self.model_pth_filename = os.path.join('checkpoints/pointersect_epoch700.pth')
         self.data_device = torch.device('cpu')
         self.model_device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
