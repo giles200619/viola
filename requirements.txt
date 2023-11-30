@@ -26,4 +26,5 @@ cython==3.0.6
 transformers
 diffusers
 invisible-watermark
+torch-scatter
 pointersect
