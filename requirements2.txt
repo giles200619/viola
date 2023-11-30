@@ -23,3 +23,6 @@ shapely
 h5py
 submitit
 cython==3.0.6
+transformers
+diffusers
+invisible-watermark
