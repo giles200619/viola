@@ -125,15 +125,19 @@ if __name__ == "__main__":
     args = get_parser().parse_args()    
     
     # step 1: run open3d reconstruction
-    run_open3d(args.data_path, args.open3d_path)
+    #run_open3d(args.data_path, args.open3d_path)
     
     # step 2: extract key frames and run mask2former 
       #extract key frames
-    os.makedirs(os.path.join(args.data_path,'key_frames'), exist_ok=True)
+    if os.path.exists(os.path.join(args.data_path,'key_frames')):
+        shutil.rmtree(os.path.join(args.data_path,'key_frames'))
+    os.makedirs(os.path.join(args.data_path,'key_frames'))
     rgb_ls = os_sorted(glob.glob(os.path.join(args.data_path,'image','*')))[::args.skip_every_n_frames]
     for rgb_file in rgb_ls:
         shutil.copy(rgb_file, os.path.join(args.data_path,'key_frames'))
       #run mask2former 
+    if os.path.exists(os.path.join(args.data_path,'mask2former')):
+        shutil.rmtree(os.path.join(args.data_path,'mask2former'))
     run_m2f(args.data_path, args.m2f_path, args.no_aug)
     
     # step 3: fuse 2D segmentation via voting
