@@ -45,21 +45,21 @@ def run_m2f(data_path, m2f_path, no_aug=False):
     cwd = os.getcwd()
     os.chdir(f'{m2f_path}/demo')
     if no_aug:
-        subprocess.run(["python",f"{m2f_path}/demo/demo_noaug.py","--config-file",
-                        f"{m2f_path}/configs/coco/panoptic-segmentation/swin/maskformer2_swin_large_IN21k_384_bs16_100ep.yaml",
+        subprocess.run(["python",f"./demo_noaug.py","--config-file",
+                        f"../configs/coco/panoptic-segmentation/swin/maskformer2_swin_large_IN21k_384_bs16_100ep.yaml",
                         "--input", f'{data_path}/key_frames',
-                        "--opts", "MODEL.WEIGHTS", f"{m2f_path}/model_weights/model_final_47429163_0.pkl"
+                        "--opts", "MODEL.WEIGHTS", f"../model_weights/model_final_47429163_0.pkl"
                         ])
         os.chdir(cwd)
-        postprocess_m2f_noaug(m2f_result_path=f'{data_path}/mask2former', path_to_csv='./')
+        postprocess_m2f_noaug(m2f_result_path=f'{data_path}/mask2former', path_to_csv=cwd)
     else:
-        subprocess.run(["python",f"{m2f_path}/demo/demo.py","--config-file",
-                        f"{m2f_path}/configs/coco/panoptic-segmentation/swin/maskformer2_swin_large_IN21k_384_bs16_100ep.yaml",
+        subprocess.run(["python",f"./demo.py","--config-file",
+                        f"../configs/coco/panoptic-segmentation/swin/maskformer2_swin_large_IN21k_384_bs16_100ep.yaml",
                         "--input", f'{data_path}/key_frames',
-                        "--opts", "MODEL.WEIGHTS", f"{m2f_path}/model_weights/model_final_47429163_0.pkl"
+                        "--opts", "MODEL.WEIGHTS", f"../model_weights/model_final_47429163_0.pkl"
                         ])
         os.chdir(cwd)
-        postprocess_m2f_aug(m2f_result_path=f'{data_path}/mask2former', path_to_csv='./')
+        postprocess_m2f_aug(m2f_result_path=f'{data_path}/mask2former', path_to_csv=cwd)
     
 def read_trajectory(filename):
     traj = []
