@@ -19,6 +19,7 @@ conda install pytorch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 pytorch-cuda=
 conda install -c fvcore -c iopath -c conda-forge fvcore iopath
 conda install pytorch3d -c pytorch3d
 conda install lightning -c conda-forge
+conda install -c conda-forge pycocotools cudatoolkit-dev
 pip install -r requirements.txt
 ```
 
@@ -41,7 +42,6 @@ The path to the model weight should look like:<br />
 `viola/mask2former/model_weights/model_final_47429163_0.pkl`<br />
 The Mask2Former model uses Detectron2, to install it from source, [run](https://detectron2.readthedocs.io/en/latest/tutorials/install.html):
 ```
-conda install -c conda-forge pycocotools cudatoolkit-dev
 python -m pip install 'git+https://github.com/facebookresearch/detectron2.git'
 pip install git+https://github.com/cocodataset/panopticapi.git
 pip install git+https://github.com/mcordts/cityscapesScripts.git
