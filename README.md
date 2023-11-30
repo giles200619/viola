@@ -35,7 +35,7 @@ git clone https://github.com/isl-org/Open3D.git
 Download Mask2Former model weight from their [Model zoo](https://github.com/facebookresearch/Mask2Former/blob/main/MODEL_ZOO.md), in this project we are using model id: 47429163_0<br />
 ```
 mkdir mask2former/model_weights
-wget https://dl.fbaipublicfiles.com/maskformer/mask2former/coco/panoptic/maskformer2_swin_large_IN21k_384_bs16_100ep/model_final_f07440.pkl -P mask2former/model_weights
+wget https://dl.fbaipublicfiles.com/maskformer/mask2former/coco/panoptic/maskformer2_swin_large_IN21k_384_bs16_100ep/model_final_f07440.pkl -O mask2former/model_weights/model_final_47429163_0.pkl
 ```
 The path to the model weight should look like:<br />
 `viola/mask2former/model_weights/model_final_47429163_0.pkl`<br />
