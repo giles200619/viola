@@ -13,9 +13,6 @@ done
 configpath=configs/data/aaa_default.yaml
 echo "Scene name:" $scene_name;
 echo "config file name:" "${configpath/aaa/"$scene_name"}";
-eval "$(conda shell.bash hook)"
-#conda activate /home/junjee.chao/anaconda3/envs/simplerecon/
-conda activate simplerecon
 
 # parse input to simplerecon format
 cd ./simplerecon
@@ -36,11 +33,8 @@ CUDA_VISIBLE_DEVICES=0 python test.py --name HERO_MODEL \
             --depth_fuser open3d \
             --fuse_color #--cache_depths --dump_depth_visualization
 # result will be saved to: ./simplerecon/output/HERO_MODEL/viola/default/meshes/0.04_3.0_open3d_color
-conda deactivate
 
 # viola
-#conda activate /home/selim/anaconda3/envs/torch2/
-conda activate torch2
 # estimate floor
 CUDA_VISIBLE_DEVICES=0 python process_viola.py --seq_name $scene_name --data_path $datapath --path_simplerecon ./
 
