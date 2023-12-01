@@ -31,18 +31,18 @@ def inpainting_view_selection(data, o3d_pcd=None, vis=False):
     mid_u = im_size[0]/2
     z_min = 0
     # find extreme cam
-    for i in range(data['droid_T_cams'].shape[0]):
-        axis_aligned_T_cam = data['axis_aligned_T_droid'] @ data['droid_T_cams'][i]
+    for i in range(data['w_T_cams'].shape[0]):
+        axis_aligned_T_cam = data['axis_aligned_T_w'] @ data['w_T_cams'][i]
         z_cam = axis_aligned_T_cam[2, 2]
         pts_current_frame = T_pcd(np.linalg.inv(axis_aligned_T_cam), extreme_pts[None, :])
         pts_canvas = ((data['K']) @ pts_current_frame.T).T
         pts_canvas = np.round((pts_canvas/pts_canvas[:, -1][..., None])[:, :2]).astype(np.int16)
         if pts_canvas[0][0] > 0 and pts_canvas[0][0] < im_size[0]-0.5 and pts_canvas[0][1] > 0 and pts_canvas[0][1] < im_size[1]-0.5:
-            extreme_cams.append(data['droid_T_cams'][i])
+            extreme_cams.append(data['w_T_cams'][i])
             if z_cam < z_min:
                 z_min = z_cam
-                extreme_cam = data['droid_T_cams'][i]
-    extreme_cams = np.array(extreme_cams)  # droid_T_cams
+                extreme_cam = data['w_T_cams'][i]
+    extreme_cams = np.array(extreme_cams)  # w_T_cams
     if vis:
         cfs_extreme_cams = [o3d.geometry.TriangleMesh.create_coordinate_frame(
             0.5) for _ in range(extreme_cams.shape[0])]
@@ -54,10 +54,10 @@ def inpainting_view_selection(data, o3d_pcd=None, vis=False):
 
     K = data['K']
 
-    floor_T_camera = data['axis_aligned_T_droid']
+    floor_T_camera = data['axis_aligned_T_w']
     camera_T_floor = np.linalg.inv(floor_T_camera)
 
-    axis_aligned_T_start_cam = data['axis_aligned_T_droid'] @ extreme_cam
+    axis_aligned_T_start_cam = data['axis_aligned_T_w'] @ extreme_cam
     # first 2 camera: move back
     z_direction = axis_aligned_T_start_cam[:3, 2]
     target_poses = []
@@ -122,7 +122,7 @@ def check_unseen_part(scene_data, vis=False):
     _, pts_idx = sample_farthest_points(torch.Tensor(scene_data['droid_2d_pts_all']).unsqueeze(0).cuda(), K=3000)
     pts_idx = pts_idx[0].cpu().numpy()
     downprojected = scene_data['droid_2d_pts_all'][pts_idx]
-    downprojected = T_pcd(scene_data['axis_aligned_T_droid'], downprojected)
+    downprojected = T_pcd(scene_data['axis_aligned_T_w'], downprojected)
     if vis:
         line_set = o3d.geometry.LineSet(
             points=o3d.utility.Vector3dVector(boundary_points),
@@ -216,10 +216,10 @@ def check_unseen_part(scene_data, vis=False):
     reversed_ordered_boundary_points, reversed_normal_vecs = sort_boundary_point_from_extreme(
         boundary_points, approx_far_pts_idx, approx_extreme_pts_idx)
     # check the direction with wall, avoid going into walls
-    wall_pts = scene_data['droid_2d_pts_all'][scene_data['droid_2d_pts_all_seg'] == 1]
+    wall_pts = scene_data['droid_2d_pts_all'][scene_data['m2f_seg'] == 1]
     _, pts_idx = sample_farthest_points(torch.Tensor(wall_pts).unsqueeze(0).cuda(), K=3000)
     wall_pts = wall_pts[pts_idx[0].cpu().numpy()]
-    wall_pts = T_pcd(scene_data['axis_aligned_T_droid'], wall_pts)
+    wall_pts = T_pcd(scene_data['axis_aligned_T_w'], wall_pts)
     d_to_check = 200 if boundary_points.shape[0] > 200 else int(boundary_points.shape[0]/2)
     ordered_pts = ordered_boundary_points[:d_to_check:10, :]
     rev_ordered_pts = reversed_ordered_boundary_points[:d_to_check:10, :]
