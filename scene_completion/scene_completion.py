@@ -8,6 +8,8 @@ from datetime import datetime
 from .model.iron_depth.predict_depth import predict_iron_depth, load_iron_depth_model
 from .model.pointersect.pointersect import PointersectInference
 from .model.utils.utils import load_sd_inpaint, get_pcd, get_o3d_pointcloud, get_colormap_pil
+import sys
+sys.path.append('..')
 from mask2former.demo.demo_function import run_m2f_segmentation
 
 
