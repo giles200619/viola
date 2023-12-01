@@ -28,3 +28,4 @@ diffusers
 invisible-watermark
 torch-scatter
 pointersect
+omegaconf
