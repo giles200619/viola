@@ -206,13 +206,15 @@ if __name__ == "__main__":
         camera_T_floor = np.linalg.inv(floor_T_camera)
 
         target_poses = inpainting_view_selection(data=data, o3d_pcd=o3d_recon)
-        
+        target_poses = camera_T_floor @ target_poses
+        poses = torch.from_numpy(target_poses).float() # droid_T_cam
+
         depth_outpainter = DepthOutpainter(K=data['K'], im_size=data['img_WH'],
             init_pcd=o3d_recon, camera_T_floor=camera_T_floor)
 
         # Complete and fuse point clouds at target viewpoints
         print('inpainting start')
-        for pose_idx, target_pose in enumerate(target_poses):
+        for pose_idx, target_pose in enumerate(poses):
             print(f'Completing view {pose_idx} / {len(target_poses) - 1}')
             depth_outpainter.view_completion(target_pose)
         inpainted_pcd = depth_outpainter.get_fused_pointcloud()
