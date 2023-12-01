@@ -11,7 +11,7 @@ from .view_selection_utils import ConcaveHull, find_largest_cluster_3D, sort_bou
 
 
 def inpainting_view_selection(data, o3d_pcd=None, vis=False):
-    im_size = (512, 384)
+    im_size = data['img_WH']
     W, H = im_size
     downprojected_unseen, extreme_pts, ordered_boundary_points, normal_vecs, coverage = check_unseen_part(
         data, vis=False)
@@ -119,9 +119,9 @@ def check_unseen_part(scene_data, vis=False):
     boundary_points = np.vstack(ch.boundary.exterior.coords.xy).T
     boundary_points = np.hstack((boundary_points, hitpts[0, -1]*np.ones((boundary_points.shape[0], 1))))
 
-    _, pts_idx = sample_farthest_points(torch.Tensor(scene_data['droid_2d_pts_all']).unsqueeze(0).cuda(), K=3000)
+    _, pts_idx = sample_farthest_points(torch.Tensor(scene_data['pts_2d_all_w']).unsqueeze(0).cuda(), K=3000)
     pts_idx = pts_idx[0].cpu().numpy()
-    downprojected = scene_data['droid_2d_pts_all'][pts_idx]
+    downprojected = scene_data['pts_2d_all_w'][pts_idx]
     downprojected = T_pcd(scene_data['axis_aligned_T_w'], downprojected)
     if vis:
         line_set = o3d.geometry.LineSet(
@@ -216,7 +216,7 @@ def check_unseen_part(scene_data, vis=False):
     reversed_ordered_boundary_points, reversed_normal_vecs = sort_boundary_point_from_extreme(
         boundary_points, approx_far_pts_idx, approx_extreme_pts_idx)
     # check the direction with wall, avoid going into walls
-    wall_pts = scene_data['droid_2d_pts_all'][scene_data['m2f_seg'] == 1]
+    wall_pts = scene_data['pts_2d_all_w'][scene_data['pts_2d_all_w_seg'] == 1]
     _, pts_idx = sample_farthest_points(torch.Tensor(wall_pts).unsqueeze(0).cuda(), K=3000)
     wall_pts = wall_pts[pts_idx[0].cpu().numpy()]
     wall_pts = T_pcd(scene_data['axis_aligned_T_w'], wall_pts)

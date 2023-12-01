@@ -73,7 +73,7 @@ def viola_matching(data, template_2d, init_method='grid', vis=False):
     scale = 1
     # simulate LiDAR hit points
     cf = o3d.geometry.TriangleMesh.create_coordinate_frame(1)
-    pts_2d, _, _, _, _, _ = geometry_utils.emulate_lidar_hitpts(
+    pts_2d, _, pts_2d_all_w, pts_2d_all_w_seg, _, cams_used_ray_cast = geometry_utils.emulate_lidar_hitpts(
         pcd, w_T_cams, axis_aligned_T_w, m2f_seg, vacuum_height=0.2/scale)
     _, pts_idx = sample_farthest_points(torch.Tensor(pts_2d).unsqueeze(0), K=500)
     pts_idx = pts_idx[0].numpy()
@@ -110,6 +110,9 @@ def viola_matching(data, template_2d, init_method='grid', vis=False):
     result = pose_optimization(template_2d, partial_2d, init_poses, iterations)
     result['template_2d'] = template_2d
     result['partial_2d'] = partial_2d
+    result['pts_2d_all_w'] = pts_2d_all_w
+    result['pts_2d_all_w_seg'] = pts_2d_all_w_seg
+    result['cams_used_ray_cast'] = cams_used_ray_cast
     return result
 
 
@@ -166,10 +169,6 @@ if __name__ == "__main__":
     template_2d[:, -1] = 1
     vacuum_height = 0.15
 
-    with open(os.path.join(args.data_path, 'intrinsic.json')) as f:
-        intrinsics_json = json.load(f)
-        intrinsics = np.array(intrinsics_json['intrinsic_matrix']).reshape(3, 3).T
-
     # load open3d result and run viola matching, viola_input.npy is generated with preprocess/redwood_open3d_m2f.py
     data = np.load(f'{args.data_path}/viola_input.npy', allow_pickle=True).item()
     result = viola_matching(data, template_2d, init_method=args.pose_init_method, vis=False)
@@ -202,16 +201,14 @@ if __name__ == "__main__":
 
     # scene completion via inpainting
     if args.scene_completion_activation == 'on' or (args.scene_completion_activation == 'criterion' and scene_completion_decision(result)):
-        pass
-        # raise NotImplementedError #TODO: inpainting module
+        data.update(result)
         floor_T_camera = data['axis_aligned_T_w']
         camera_T_floor = np.linalg.inv(floor_T_camera)
 
-        # target_poses = inpainting_view_selection(data=data, o3d_pcd=o3d_recon)
-        target_poses = np.eye(4)[None]
-
-        depth_outpainter = DepthOutpainter(K=intrinsics, im_size=(
-            512, 384), init_pcd=o3d_recon, camera_T_floor=camera_T_floor)
+        target_poses = inpainting_view_selection(data=data, o3d_pcd=o3d_recon)
+        
+        depth_outpainter = DepthOutpainter(K=data['K'], im_size=data['img_WH'],
+            init_pcd=o3d_recon, camera_T_floor=camera_T_floor)
 
         # Complete and fuse point clouds at target viewpoints
         print('inpainting start')
@@ -224,8 +221,9 @@ if __name__ == "__main__":
             inpainted_pcd,
             data['w_T_cams'],
             data['axis_aligned_T_w'],
-            data['m2f_seg'],
-            vacuum_height=0.2)
+            None,
+            vacuum_height=vacuum_height,
+            cams_used_ray_cast=data['cams_used_ray_cast'])
 
         recon_2d_pts = recon_2d_pts[0]
         _, pts_idx = sample_farthest_points(torch.Tensor(recon_2d_pts).unsqueeze(0), K=500)
@@ -234,12 +232,34 @@ if __name__ == "__main__":
         partial_2d = T_pcd(data['axis_aligned_T_w'], recon_2d_pts)
         partial_2d[:, -1] = 1
         data['partial_2d'] = partial_2d
-        #
+        # pose init and optimization
+        print('pose initialization:', args.pose_init_method)
+        img_cor_t0 = time.time()
+        if args.pose_init_method == 'grid':
+            init_poses = optimization_utils.grid_initialization(template_2d, grid_n=10)
+        elif args.pose_init_method == 'img_cross_correlation':
+            init_poses = cross_correlation_utils.get_cross_correlation_matches(partial_2d, template_2d, False, False)
+        else:
+            raise NotImplementedError
+        print('pose init time', time.time()-img_cor_t0)
+        result_completed = pose_optimization(template_2d, partial_2d, init_poses, iterations = 180)
+        # 
         result = {}
-        result['partial_2d'] = partial_2d
+        result['partial_2d_completed'] = partial_2d
         result['inpainting_target_pose'] = target_poses
         result['inpainted_pts'] = np.asarray(inpainted_pcd.points)
         result['inpainted_pts_colors'] = np.asarray(inpainted_pcd.colors)
-
+        
+        est_T_completed = result_completed['est_T']
+        # repeated visualization
+        est_patial_pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector((est_T @ data['partial_2d'].T).T))
+        est_patial_pcd.paint_uniform_color([1, 0, 0])
+        cf = o3d.geometry.TriangleMesh.create_coordinate_frame()
+        o3d.visualization.draw_geometries(
+            [est_patial_pcd, o3d.geometry.PointCloud(o3d.utility.Vector3dVector(template_2d))])
+        est_pose_3d = np.eye(4)
+        est_pose_3d[:2, :2] = est_T_completed[:2, :2]
+        est_pose_3d[:2, -1] = est_T_completed[:2, -1]
+        
     import pdb
     pdb.set_trace()

@@ -29,3 +29,4 @@ invisible-watermark
 torch-scatter
 pointersect
 omegaconf
+accelerate

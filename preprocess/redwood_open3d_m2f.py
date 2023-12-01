@@ -164,6 +164,8 @@ if __name__ == "__main__":
     viola_input['m2f_seg'] = seg_labels
     viola_input['w_T_cam0'] = w_T_cams[0]
     viola_input['w_T_cams'] = w_T_cams
+    viola_input['K'] = redwood_intrinsic
+    viola_input['img_WH'] = (redwood_W, redwood_H)
     viola_input['axis_aligned_T_w'] = est_gravity(np.asarray(seg_pcd.points), seg_labels, 
                                                   plane_threshold=0.02, vis=False, min_wall_pts = 100, ransac_iter=5000)
     np.save(os.path.join(args.data_path, 'viola_input.npy'), viola_input)
