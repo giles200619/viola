@@ -218,17 +218,18 @@ if __name__ == "__main__":
             depth_outpainter.view_completion(target_pose)
         inpainted_pcd = depth_outpainter.get_fused_pointcloud()
         print('inpainting end, start simulate lidar hitpoint')
-        droid_2d_pts = geometry_utils.emulate_lidar_hitpts(
-            inpainted_pcd, data['droid_T_cams'],
-            data['axis_aligned_T_droid'],
+        recon_2d_pts = geometry_utils.emulate_lidar_hitpts(
+            inpainted_pcd, 
+            data['w_T_cams'],
+            data['axis_aligned_T_w'],
             data['m2f_seg'],
             vacuum_height=0.2)
 
-        droid_2d_pts = droid_2d_pts[0]
-        _, pts_idx = sample_farthest_points(torch.Tensor(droid_2d_pts).unsqueeze(0), K=500)
+        recon_2d_pts = recon_2d_pts[0]
+        _, pts_idx = sample_farthest_points(torch.Tensor(recon_2d_pts).unsqueeze(0), K=500)
         pts_idx = pts_idx[0].numpy()
-        droid_2d_pts = droid_2d_pts[pts_idx]
-        partial_2d = T_pcd(data['axis_aligned_T_droid'], droid_2d_pts)
+        recon_2d_pts = recon_2d_pts[pts_idx]
+        partial_2d = T_pcd(data['axis_aligned_T_w'], recon_2d_pts)
         partial_2d[:, -1] = 1
         data['partial_2d'] = partial_2d
         #
