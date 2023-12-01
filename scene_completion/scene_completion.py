@@ -8,13 +8,14 @@ from datetime import datetime
 from .model.iron_depth.predict_depth import predict_iron_depth, load_iron_depth_model
 from .model.pointersect.pointersect import PointersectInference
 from .model.utils.utils import load_sd_inpaint, get_pcd, get_o3d_pointcloud, get_colormap_pil
+from .scene_completion_config import SceneCompletionConfig
 import sys
 sys.path.append('..')
 from mask2former.demo.demo_function import run_m2f_segmentation
 
 
 class DepthOutpainter:
-    def __init__(self, args, K, im_size, init_pcd, camera_T_floor) -> None:
+    def __init__(self, K, im_size, init_pcd, camera_T_floor) -> None:
         """initializes the depth outpainter
 
         :param args: cli arguments
@@ -24,7 +25,7 @@ class DepthOutpainter:
         :param camera_T_floor: floor frame in the first camera frame
         """
 
-        self.args = args
+        self.args = SceneCompletionConfig().get_config()
 
         self.models_path = 'checkpoints'
         self.iron_depth_type = 'scannet'

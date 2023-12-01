@@ -200,9 +200,6 @@ if __name__ == "__main__":
     o3d.visualization.draw_geometries([o3d.geometry.PointCloud(
         o3d.utility.Vector3dVector(template_points)), semantic_pcd])
 
-    import pdb
-    pdb.set_trace()
-
     # scene completion via inpainting
     if args.scene_completion_activation == 'on' or (args.scene_completion_activation == 'criterion' and scene_completion_decision(result)):
         pass
@@ -213,7 +210,7 @@ if __name__ == "__main__":
         # target_poses = inpainting_view_selection(data=data, o3d_pcd=o3d_recon)
         target_poses = np.eye(4)[None]
 
-        depth_outpainter = DepthOutpainter(args=args, K=intrinsics, im_size=(
+        depth_outpainter = DepthOutpainter(K=intrinsics, im_size=(
             512, 384), init_pcd=o3d_recon, camera_T_floor=camera_T_floor)
 
         # Complete and fuse point clouds at target viewpoints
@@ -244,5 +241,5 @@ if __name__ == "__main__":
         result['inpainted_pts'] = np.asarray(inpainted_pcd.points)
         result['inpainted_pts_colors'] = np.asarray(inpainted_pcd.colors)
 
-        import pdb
-        pdb.set_trace()
+    import pdb
+    pdb.set_trace()
