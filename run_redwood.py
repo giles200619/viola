@@ -16,7 +16,7 @@ from preprocess.postprocess_m2f import reduced_colormap
 import torch.optim as optim
 import time
 import argparse
-import pytorch3d
+import json
 from pytorch3d.ops import sample_farthest_points
 
 # scene completion
@@ -166,6 +166,10 @@ if __name__ == "__main__":
     template_2d[:, -1] = 1
     vacuum_height = 0.15
 
+    with open(os.path.join(args.data_path, 'intrinsic.json')) as f:
+        intrinsics_json = json.load(f)
+        intrinsics = np.array(intrinsics_json['intrinsic_matrix']).reshape(3, 3).T
+
     # load open3d result and run viola matching, viola_input.npy is generated with preprocess/redwood_open3d_m2f.py
     data = np.load(f'{args.data_path}/viola_input.npy', allow_pickle=True).item()
     result = viola_matching(data, template_2d, init_method=args.pose_init_method, vis=False)
@@ -206,9 +210,10 @@ if __name__ == "__main__":
         floor_T_camera = data['axis_aligned_T_w']
         camera_T_floor = np.linalg.inv(floor_T_camera)
 
-        target_poses = inpainting_view_selection(data=data, o3d_pcd=o3d_recon)
+        # target_poses = inpainting_view_selection(data=data, o3d_pcd=o3d_recon)
+        target_poses = np.eye(4)[None]
 
-        depth_outpainter = DepthOutpainter(args=args, K=data['K'], im_size=(
+        depth_outpainter = DepthOutpainter(args=args, K=intrinsics, im_size=(
             512, 384), init_pcd=o3d_recon, camera_T_floor=camera_T_floor)
 
         # Complete and fuse point clouds at target viewpoints
@@ -219,7 +224,7 @@ if __name__ == "__main__":
         inpainted_pcd = depth_outpainter.get_fused_pointcloud()
         print('inpainting end, start simulate lidar hitpoint')
         recon_2d_pts = geometry_utils.emulate_lidar_hitpts(
-            inpainted_pcd, 
+            inpainted_pcd,
             data['w_T_cams'],
             data['axis_aligned_T_w'],
             data['m2f_seg'],
