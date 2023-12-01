@@ -63,6 +63,11 @@ Due to torch_lightning version difference, you might encouter missing key error 
 ```
 python ./utils/fix_hero_model_keys.py 
 ```
+
+### Scene completion (optional)
+
+For using the scene completion module, we need additional packages. 
+
 #### Stable Diffusion V2
 To setup Stable Diffusion, run:<br />
 ```
@@ -78,6 +83,13 @@ Optionally, install [xFormers](https://github.com/facebookresearch/xformers) for
 Download the model weights for the depth estimation model using the instructions in [the IronDepth repository](https://github.com/baegwangbin/IronDepth).<br />
 - Download the files `normal_scannet.pt` and `irondepth_scannet.pt`
 - Move them to the directory `viola/checkpoints`
+
+
+There is a version mismatch for the OpenEXR package. To fix this issue, run:
+```
+pip uninstall openexr
+conda install -c conda-forge openexr-python
+```
 
 
 ### Quick start:
