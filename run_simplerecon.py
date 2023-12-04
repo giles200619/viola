@@ -1,10 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Aug 30 16:07:18 2023
-
-@author: jj
-"""
 import numpy as np
 import open3d as o3d
 import os

@@ -1,11 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Nov 15 00:41:49 2023
-
-@author: jj
-"""
-
 import numpy as np
 import open3d as o3d
 import os
@@ -177,11 +169,11 @@ if __name__ == "__main__":
     est_T = result['est_T']
 
     # visualization 2d
-    est_patial_pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector((est_T @ data['partial_2d'].T).T))
-    est_patial_pcd.paint_uniform_color([1, 0, 0])
+    est_partial_pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector((est_T @ data['partial_2d'].T).T))
+    est_partial_pcd.paint_uniform_color([1, 0, 0])
     cf = o3d.geometry.TriangleMesh.create_coordinate_frame()
     o3d.visualization.draw_geometries(
-        [est_patial_pcd, o3d.geometry.PointCloud(o3d.utility.Vector3dVector(template_2d))])
+        [est_partial_pcd, o3d.geometry.PointCloud(o3d.utility.Vector3dVector(template_2d))])
     # visualization 3d
     est_pose_3d = np.eye(4)
     est_pose_3d[:2, :2] = est_T[:2, :2]
@@ -252,7 +244,7 @@ if __name__ == "__main__":
             raise NotImplementedError
         print('pose init time', time.time()-img_cor_t0)
         result_completed = pose_optimization(template_2d, partial_2d, init_poses, iterations=180)
-        #
+
         result = {}
         result['partial_2d_completed'] = partial_2d
         result['inpainting_target_pose'] = target_poses
@@ -261,11 +253,11 @@ if __name__ == "__main__":
 
         est_T_completed = result_completed['est_T']
         # repeated visualization
-        est_patial_pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector((est_T @ data['partial_2d'].T).T))
-        est_patial_pcd.paint_uniform_color([1, 0, 0])
+        est_partial_pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector((est_T @ data['partial_2d'].T).T))
+        est_partial_pcd.paint_uniform_color([1, 0, 0])
         cf = o3d.geometry.TriangleMesh.create_coordinate_frame()
         o3d.visualization.draw_geometries(
-            [est_patial_pcd, o3d.geometry.PointCloud(o3d.utility.Vector3dVector(template_2d))])
+            [est_partial_pcd, o3d.geometry.PointCloud(o3d.utility.Vector3dVector(template_2d))])
         est_pose_3d = np.eye(4)
         est_pose_3d[:2, :2] = est_T_completed[:2, :2]
         est_pose_3d[:2, -1] = est_T_completed[:2, -1]
