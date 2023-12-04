@@ -17,6 +17,7 @@ import torch.optim as optim
 import time
 import argparse
 import json
+from pytorch_lightning import seed_everything
 from pytorch3d.ops import sample_farthest_points
 
 # scene completion
@@ -157,6 +158,7 @@ def get_parser():
 
 
 if __name__ == "__main__":
+    seed_everything(1)
     args = get_parser().parse_args()
     print('start viola...')
     # load lidar data
