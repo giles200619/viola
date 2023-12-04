@@ -45,7 +45,7 @@ class DepthOutpainter:
         self.K_torch = torch.from_numpy(self.K).float()
         self.inpainting_size = (512, 512, 3)
 
-        self.ground_floor_depth = True
+        self.ground_floor_depth = False
         floor_size = 5.
         floor_grid_dim = 64
         self.floor_points = np.argwhere(np.zeros((floor_grid_dim, floor_grid_dim)) == 0)

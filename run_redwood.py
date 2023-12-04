@@ -210,10 +210,11 @@ if __name__ == "__main__":
         poses = torch.from_numpy(target_poses).float()  # droid_T_cam
 
         o3d_recon_cam = o3d.io.read_point_cloud(f'{args.data_path}/scene/integrated.ply')
+        o3d_recon_cam, _ = o3d_recon_cam.remove_statistical_outlier(nb_neighbors=200, std_ratio=2.0)
         K_rescaled = np.copy(data['K'])
         rescaling_factor = 512. / max(data['img_WH'])
         K_rescaled[:2] *= rescaling_factor
-        depth_outpainter = DepthOutpainter(K=K_rescaled, im_size=(512, int(rescaling_factor * 512)),
+        depth_outpainter = DepthOutpainter(K=K_rescaled, im_size=(512, int(rescaling_factor * min(data['img_WH']))),
                                            init_pcd=o3d_recon_cam, camera_T_floor=camera_T_floor)
 
         # Complete and fuse point clouds at target viewpoints
