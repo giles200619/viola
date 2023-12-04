@@ -207,10 +207,14 @@ if __name__ == "__main__":
 
         target_poses = inpainting_view_selection(data=data, o3d_pcd=o3d_recon)
         target_poses = camera_T_floor @ target_poses
-        poses = torch.from_numpy(target_poses).float() # droid_T_cam
+        poses = torch.from_numpy(target_poses).float()  # droid_T_cam
 
-        depth_outpainter = DepthOutpainter(K=data['K'], im_size=data['img_WH'],
-            init_pcd=o3d_recon, camera_T_floor=camera_T_floor)
+        o3d_recon_cam = o3d.io.read_point_cloud(f'{args.data_path}/scene/integrated.ply')
+        K_rescaled = np.copy(data['K'])
+        rescaling_factor = 512. / max(data['img_WH'])
+        K_rescaled[:2] *= rescaling_factor
+        depth_outpainter = DepthOutpainter(K=K_rescaled, im_size=(512, int(rescaling_factor * 512)),
+                                           init_pcd=o3d_recon_cam, camera_T_floor=camera_T_floor)
 
         # Complete and fuse point clouds at target viewpoints
         print('inpainting start')
@@ -244,14 +248,14 @@ if __name__ == "__main__":
         else:
             raise NotImplementedError
         print('pose init time', time.time()-img_cor_t0)
-        result_completed = pose_optimization(template_2d, partial_2d, init_poses, iterations = 180)
-        # 
+        result_completed = pose_optimization(template_2d, partial_2d, init_poses, iterations=180)
+        #
         result = {}
         result['partial_2d_completed'] = partial_2d
         result['inpainting_target_pose'] = target_poses
         result['inpainted_pts'] = np.asarray(inpainted_pcd.points)
         result['inpainted_pts_colors'] = np.asarray(inpainted_pcd.colors)
-        
+
         est_T_completed = result_completed['est_T']
         # repeated visualization
         est_patial_pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector((est_T @ data['partial_2d'].T).T))
@@ -262,6 +266,6 @@ if __name__ == "__main__":
         est_pose_3d = np.eye(4)
         est_pose_3d[:2, :2] = est_T_completed[:2, :2]
         est_pose_3d[:2, -1] = est_T_completed[:2, -1]
-        
+
     import pdb
     pdb.set_trace()

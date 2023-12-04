@@ -32,7 +32,7 @@ class DepthOutpainter:
         self.iron_depth_iters = 20
         self.im_size = im_size
         self.W, self.H = im_size
-        self.vis_images = False
+        self.vis_images = True
 
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         self.camera_T_floor = camera_T_floor
@@ -128,14 +128,14 @@ class DepthOutpainter:
         canvas[:rendered_rgb_np.shape[0], :rendered_rgb_np.shape[1]] = rendered_rgb_np
         rendered_rgb_pil = Image.fromarray((canvas * 255).astype(np.uint8))
         if self.vis_images:
-            rendered_rgb_pil.show()
+            rendered_rgb_pil.save(f'rendered_rgb_{self.counter}.png')
         mask_np = (np.asarray(rendered_rgb_pil) == 0).all(-1).astype(np.uint8) * 255
         mask_pil = Image.fromarray(mask_np)
 
         # Inpainting
         inpainted_rgb_pil = self.inpaint(rendered_rgb_pil, mask_pil)
         if self.vis_images:
-            inpainted_rgb_pil.show()
+            inpainted_rgb_pil.save(f'inpainted_rgb_{self.counter}.png')
 
         inpainted_rgb_np = np.array(inpainted_rgb_pil)
         inpainted_rgb_pil = inpainted_rgb_pil.crop((0, 0, self.W, self.H))
@@ -150,7 +150,7 @@ class DepthOutpainter:
         depth_estimated_torch = self.predict_depth(inpainted_rgb_pil, rendered_depth_torch, rendered_mask_torch)
         depth_estimated_np = depth_estimated_torch.cpu().detach().numpy()
         if self.vis_images:
-            get_colormap_pil(depth_estimated_np).show()
+            get_colormap_pil(depth_estimated_np).save(f'depth_{self.counter}.png')
 
         # 3D projection
         mask_np_cropped = np.asarray(mask_pil.crop((0, 0, self.W, self.H)))

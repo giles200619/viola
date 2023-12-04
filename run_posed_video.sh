@@ -32,7 +32,7 @@ CUDA_VISIBLE_DEVICES=0 python test.py --name HERO_MODEL \
 --fast_cost_volume \
 --run_fusion \
 --depth_fuser open3d \
---fuse_color #--cache_depths --dump_depth_visualization
+--fuse_color
 
 echo "Result will be saved to: ./simplerecon/output/HERO_MODEL/viola/default/meshes/0.04_3.0_open3d_color"
 
