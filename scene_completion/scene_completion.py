@@ -176,7 +176,7 @@ class DepthOutpainter:
         floor_pcd.paint_uniform_color([0, 0, 0])
         _, rendered_floor_depth_np = self.render_pointcloud(floor_pcd, self.K_torch, pose_c)
 
-        semantic_seg = run_m2f_segmentation(self.args, np.array(inpainted_rgb_pil))
+        semantic_seg = run_m2f_segmentation(np.array(inpainted_rgb_pil))
         floor_seg = semantic_seg == self.floor_id
 
         rendered_depth_np += rendered_floor_depth_np * (floor_seg * (rendered_depth_np == 0))
