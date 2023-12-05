@@ -101,12 +101,12 @@ conda install -c conda-forge openexr-python
 ### Quick start:
 We provide both RGBD and posed-RGB sample data. Download and unzip `viola_sample_data.zip`.<br />
 #### To run posed-RGB sample data: <br />
-This script provides a minimal but faster example to test VioLA on posed-RGB data captured with ARCore. Note that this example does not estimate semantic point cloud but only align video scans to LiDAR map. The gravity direction is estimated with ARCore API. <br />
+This script provides a minimal but faster example to test VioLA on RGB sequences tagged with ARCore poses. Note that this example does not estimate semantic point cloud but only aligns video scans to the LiDAR map. The gravity direction is estimated with ARCore API. <br />
 First modify the paths in `match_simplerecon.sh`:<br />
 ```
-datapath=<path to viola_sample_data/posed_rgb/>
+datapath=<path/to/viola_sample_data/posed_rgb/>
 scene_name=arcore-dataset-2023-10-27-18-46-17
-lidarpath=<path to viola_sample_data/posed_rgb/office.ply>
+lidarpath=<path/to/viola_sample_data/posed_rgb/office.ply>
 ```
 Then run:<br />
 ```
@@ -114,7 +114,7 @@ bash match_simplerecon.sh
 ```
 #### To run RGBD sample data: <br />
 This example runs the full VioLA pipeline described in the main paper by first reconstructing the scene with Open3D, then apply Mask2Former to the key frames for semantic segmentation. The 2D masks are fused into 3D to obtain the semantic points clouds. Finally we perform pose registration and optionally, scene completion.<br />
-To start, first run the following for preprosseing (Open3d reconstruction + semantic point cloud prediction with Mask2Former):<br />
+To start, first run the following for preprocessing (Open3d reconstruction + semantic point cloud prediction with Mask2Former):<br />
 ```
 cd preprocess/
 python redwood_open3d_m2f.py --data_path <path to viola_sample/redwood/loft_short> --open3d_path <path to open3d> --m2f_path ../mask2former --skip_every_n_frames 15
