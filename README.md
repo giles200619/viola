@@ -112,6 +112,21 @@ Then run:<br />
 ```
 bash match_simplerecon.sh 
 ```
+If you run into import error in `ms_deform_attn.py` with the package `MultiScaleDeformableAttention-1.0`,<br />
+modify the file: `<path to your Anaconda>/envs/viola/lib/python3.9/site-packages/MultiScaleDeformableAttention-1.0-py3.9-linux-x86_64.egg/modules/ms_deform_attn.py`:<br />
+from:
+```
+from ..functions import MSDeformAttnFunction
+from ..functions.ms_deform_attn_func import ms_deform_attn_core_pytorch
+```
+to:
+```
+import sys
+sys.path.append('..')
+from functions import MSDeformAttnFunction
+from functions.ms_deform_attn_func import ms_deform_attn_core_pytorch
+```
+
 #### To run RGBD sample data: <br />
 This example runs the full VioLA pipeline described in the main paper by first reconstructing the scene with Open3D, then apply Mask2Former to the key frames for semantic segmentation. The 2D masks are fused into 3D to obtain the semantic points clouds. Finally we perform pose registration and optionally, scene completion.<br />
 To start, first run the following for preprocessing (Open3d reconstruction + semantic point cloud prediction with Mask2Former):<br />
