@@ -9,6 +9,7 @@ import torch.optim as optim
 import time
 import argparse
 import json
+import copy
 from pytorch_lightning import seed_everything
 from pytorch3d.ops import sample_farthest_points
 
@@ -136,7 +137,7 @@ def get_parser():
     )
     parser.add_argument(
         "--pose_init_method",
-        default='img_cross_correlation',
+        default='grid',
         choices=['grid', 'img_cross_correlation'],
         help="method for pose initialization between 2D point clouds"
     )
@@ -187,7 +188,7 @@ if __name__ == "__main__":
     o3d_recon.transform(est_pose_3d)
     semantic_pcd.transform(data['axis_aligned_T_w'])
     semantic_pcd.transform(est_pose_3d)
-    template_points = template_2d
+    template_points = copy.copy(template_2d)
     template_points[:, -1] = 0
     o3d.visualization.draw_geometries([o3d.geometry.PointCloud(o3d.utility.Vector3dVector(template_points)), o3d_recon])
     o3d.visualization.draw_geometries([o3d.geometry.PointCloud(
@@ -210,7 +211,7 @@ if __name__ == "__main__":
         K_rescaled[:2] *= rescaling_factor
         depth_outpainter = DepthOutpainter(K=K_rescaled, im_size=(512, int(rescaling_factor * min(data['img_WH']))),
                                            init_pcd=o3d_recon_cam, camera_T_floor=camera_T_floor)
-
+        
         # Complete and fuse point clouds at target viewpoints
         print('inpainting start')
         for pose_idx, target_pose in enumerate(poses):
@@ -253,7 +254,9 @@ if __name__ == "__main__":
 
         est_T_completed = result_completed['est_T']
         # repeated visualization
-        est_partial_pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector((est_T @ data['partial_2d'].T).T))
+        o3d.visualization.draw_geometries([inpainted_pcd])
+        
+        est_partial_pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector((est_T @ partial_2d.T).T))
         est_partial_pcd.paint_uniform_color([1, 0, 0])
         cf = o3d.geometry.TriangleMesh.create_coordinate_frame()
         o3d.visualization.draw_geometries(
