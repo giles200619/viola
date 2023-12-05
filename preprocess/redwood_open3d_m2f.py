@@ -125,7 +125,7 @@ if __name__ == "__main__":
     args = get_parser().parse_args()    
     
     # step 1: run open3d reconstruction
-    #run_open3d(args.data_path, args.open3d_path)
+    run_open3d(args.data_path, args.open3d_path)
     
     # step 2: extract key frames and run mask2former 
       #extract key frames

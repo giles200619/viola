@@ -137,7 +137,7 @@ def get_parser():
     )
     parser.add_argument(
         "--pose_init_method",
-        default='grid',
+        default='img_cross_correlation',
         choices=['grid', 'img_cross_correlation'],
         help="method for pose initialization between 2D point clouds"
     )
@@ -264,6 +264,10 @@ if __name__ == "__main__":
         est_pose_3d = np.eye(4)
         est_pose_3d[:2, :2] = est_T_completed[:2, :2]
         est_pose_3d[:2, -1] = est_T_completed[:2, -1]
+        
+        inpainted_pcd.transform(data['axis_aligned_T_w'])
+        inpainted_pcd.transform(est_pose_3d)
+        o3d.visualization.draw_geometries([o3d.geometry.PointCloud(o3d.utility.Vector3dVector(template_points)), inpainted_pcd])
 
     import pdb
     pdb.set_trace()
