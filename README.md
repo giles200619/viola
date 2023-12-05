@@ -23,6 +23,8 @@ conda install -c conda-forge pycocotools cudatoolkit-dev
 pip install -r requirements.txt
 ```
 
+We provide demo scripts in the [quick start](#quick-start) section to run VioLA on RGBD sequences as presented in the paper, as well as on RGB videos tagged with ARCore poses.
+
 
 ### Thirdparty modules:
 #### Open3D
@@ -50,8 +52,11 @@ cd mask2former/mask2former/modeling/pixel_decoder/ops
 sh make.sh
 ```
 
-#### Simplerecon
-Download the `hero_model` weight from [Simplerecon](https://github.com/nianticlabs/simplerecon#-models). You can download the file from terminal using gdown:<br />
+#### SimpleRecon
+
+VioLA uses SimpleRecon for reconstructing posed RGB videos.
+
+Download the `hero_model` weight from [SimpleRecon](https://github.com/nianticlabs/simplerecon#-models). You can download the file from terminal using gdown:<br />
 ```
 pip install gdown
 gdown https://drive.google.com/uc?id=1hCuKZjEq-AghrYAmFxJs_4eeixIlP488
@@ -68,18 +73,11 @@ python ./utils/fix_hero_model_keys.py
 
 For using the scene completion module, we need additional packages. 
 
-#### Stable Diffusion V2
-To setup Stable Diffusion, run:<br />
+Install the pointersect model used for rendering the reconstructed point cloud from target views:
 ```
-git clone https://github.com/Stability-AI/stablediffusion.git
-cd stablediffusion/
-pip install -e .
-cd ..
+pip install pointersect
 ```
-Optionally, install [xFormers](https://github.com/facebookresearch/xformers) for speed and efficiency by following [Stable Diffusion's repo](https://github.com/Stability-AI/stablediffusion#xformers-efficient-attention).
 
-
-#### Iron Depth
 Download the model weights for the depth estimation model using the instructions in [the IronDepth repository](https://github.com/baegwangbin/IronDepth).<br />
 - Download the files `normal_scannet.pt` and `irondepth_scannet.pt`
 - Move them to the directory `viola/checkpoints`
