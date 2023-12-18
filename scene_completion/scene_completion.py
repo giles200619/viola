@@ -167,6 +167,9 @@ class DepthOutpainter:
 
         # Point cloud rendering
         # pose_c = pose_c[None, None]
+        if not self.scene_pcd.has_normals():
+            self.scene_pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.1, max_nn=30))
+
         rendered_rgb_np, rendered_depth_np = self.render_pointcloud(self.scene_pcd, self.K, pose_c)
         canvas = np.zeros(self.inpainting_size, dtype=rendered_rgb_np.dtype)
         canvas[:rendered_rgb_np.shape[0], :rendered_rgb_np.shape[1]] = rendered_rgb_np
@@ -205,7 +208,6 @@ class DepthOutpainter:
 
         self.scene_pcd += inpainted_pcd
         self.scene_pcd = self.scene_pcd.voxel_down_sample(voxel_size=0.005)
-        self.scene_pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.1, max_nn=30))
         self.counter += 1
 
     def floor_grounding(self, inpainted_rgb_pil: Image.Image, rendered_depth_np: np.ndarray, pose_c: np.ndarray):
