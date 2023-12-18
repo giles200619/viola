@@ -202,7 +202,8 @@ if __name__ == "__main__":
 
         target_poses = inpainting_view_selection(data=data, o3d_pcd=o3d_recon)
         target_poses = camera_T_floor @ target_poses
-        poses = torch.from_numpy(target_poses).float()  # droid_T_cam
+        # poses = torch.from_numpy(target_poses).float()  # droid_T_cam
+        poses = target_poses
 
         o3d_recon_cam = o3d.io.read_point_cloud(f'{args.data_path}/scene/integrated.ply')
         o3d_recon_cam, _ = o3d_recon_cam.remove_statistical_outlier(nb_neighbors=200, std_ratio=2.0)

@@ -4,6 +4,9 @@ import torch
 import numpy as np
 import open3d as o3d
 from datetime import datetime
+import pyrender
+import trimesh
+from sklearn.neighbors import NearestNeighbors
 
 from .model.iron_depth.predict_depth import predict_iron_depth, load_iron_depth_model
 from .model.pointersect.pointersect import PointersectInference
@@ -64,7 +67,7 @@ class DepthOutpainter:
 
         self.pointersect_model = PointersectInference(im_size=self.im_size)
 
-    def render_pointcloud(self, pointcloud_c_o3d: o3d.geometry.PointCloud, K: torch.tensor, H_c2w: torch.tensor):
+    def render_pointcloud_pointersect(self, pointcloud_c_o3d: o3d.geometry.PointCloud, K: torch.tensor, H_c2w: torch.tensor):
         """renders point cloud pointcloud_c_o3d at poses H_c2w
 
         :param pointcloud_c_o3d: scene point cloud
@@ -79,6 +82,46 @@ class DepthOutpainter:
         )
 
         return rendered_rgb_np, rendered_depth_np
+
+    def render_pointcloud(self, pointcloud_c_o3d: o3d.geometry.PointCloud, K: np.ndarray, H_c2w: np.ndarray):
+        # reconstruct color mesh
+        recon_pts = np.asarray(pointcloud_c_o3d.points)
+        with o3d.utility.VerbosityContextManager(
+                o3d.utility.VerbosityLevel.Debug) as cm:
+            mesh, densities = o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(
+                pointcloud_c_o3d, depth=9)
+        vertices = np.asarray(mesh.vertices)
+        y_nn = NearestNeighbors(n_neighbors=1, leaf_size=1, algorithm='kd_tree', metric='l2').fit(recon_pts)
+        min_v_to_p = y_nn.kneighbors(vertices)[0]
+
+        mesh.remove_vertices_by_mask(min_v_to_p > 0.05)
+        # render image
+        tri_mesh = trimesh.Trimesh(np.asarray(mesh.vertices), np.asarray(mesh.triangles),
+                                   vertex_normals=np.asarray(mesh.vertex_normals),
+                                   vertex_colors=np.asarray(mesh.vertex_colors))
+        py_mesh = pyrender.Mesh.from_trimesh(tri_mesh, smooth=False)
+        # scene = pyrender.Scene()
+        scene = pyrender.Scene(ambient_light=[1, 1, 1], bg_color=[0, 0, 0])
+        camera = pyrender.IntrinsicsCamera(fx=K[0][0], fy=K[1][1], cx=K[0][2], cy=K[1][2],
+                                           znear=0.05, zfar=100.0)
+        light = pyrender.DirectionalLight(color=[1, 1, 1], intensity=1e3)
+
+        scene.add(py_mesh)
+        opengl_c2w = H_c2w @ np.array([[1, 0, 0, 0],
+                                       [0, -1, 0, 0],
+                                       [0, 0, -1, 0],
+                                       [0, 0, 0, 1]])
+        scene.add(light, pose=opengl_c2w)
+
+        scene.add(camera, pose=opengl_c2w)
+        # pyrender.Viewer(scene, use_raymond_lighting=True)
+        # render scene
+        im_size = self.im_size
+        r = pyrender.OffscreenRenderer(viewport_width=im_size[0],
+                                       viewport_height=im_size[1])
+        rgb, depth = r.render(scene)
+        r.delete()
+        return rgb, depth
 
     def inpaint(self, rendered_image_pil, inpaint_mask_pil):
 
@@ -123,7 +166,7 @@ class DepthOutpainter:
 
         # Point cloud rendering
         pose_c = pose_c[None, None]
-        rendered_rgb_np, rendered_depth_np = self.render_pointcloud(self.scene_pcd, self.K_torch, pose_c)
+        rendered_rgb_np, rendered_depth_np = self.render_pointcloud(self.scene_pcd, self.K, pose_c)
         canvas = np.zeros(self.inpainting_size, dtype=rendered_rgb_np.dtype)
         canvas[:rendered_rgb_np.shape[0], :rendered_rgb_np.shape[1]] = rendered_rgb_np
         rendered_rgb_pil = Image.fromarray((canvas * 255).astype(np.uint8))
@@ -174,7 +217,7 @@ class DepthOutpainter:
         floor_pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(self.floor_points))
         floor_pcd.transform(self.camera_T_floor)
         floor_pcd.paint_uniform_color([0, 0, 0])
-        _, rendered_floor_depth_np = self.render_pointcloud(floor_pcd, self.K_torch, pose_c)
+        _, rendered_floor_depth_np = self.render_pointcloud(floor_pcd, self.K, pose_c)
 
         semantic_seg = run_m2f_segmentation(self.args, np.array(inpainted_rgb_pil), './preprocess/')
         floor_seg = semantic_seg == self.floor_id
