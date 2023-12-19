@@ -49,7 +49,7 @@ class DepthOutpainter:
         self.K_torch = torch.from_numpy(self.K).float()
         self.inpainting_size = (512, 512, 3)
 
-        self.ground_floor_depth = True
+        self.ground_floor_depth = False
         floor_size = 5.
         floor_grid_dim = 64
         self.floor_points = np.argwhere(np.zeros((floor_grid_dim, floor_grid_dim)) == 0)
@@ -173,7 +173,8 @@ class DepthOutpainter:
         rendered_rgb_np, rendered_depth_np = self.render_pointcloud(self.scene_pcd, self.K, pose_c)
         canvas = np.zeros(self.inpainting_size, dtype=rendered_rgb_np.dtype)
         canvas[:rendered_rgb_np.shape[0], :rendered_rgb_np.shape[1]] = rendered_rgb_np
-        rendered_rgb_pil = Image.fromarray((canvas * 255).astype(np.uint8))
+        # rendered_rgb_pil = Image.fromarray((canvas * 255).astype(np.uint8))
+        rendered_rgb_pil = Image.fromarray(canvas)
         if self.vis_images:
             rendered_rgb_pil.save(f'rendered_rgb_{self.counter}.png')
         mask_np = (np.asarray(rendered_rgb_pil) == 0).all(-1).astype(np.uint8) * 255
@@ -204,7 +205,7 @@ class DepthOutpainter:
         inpainted_pts, inpainted_colors = get_pcd(
             self.K, inpainted_rgb_np, depth_estimated_np, mask=np.logical_and(depth_estimated_np > 0, mask_np_cropped))
         inpainted_pcd = get_o3d_pointcloud(inpainted_pts, inpainted_colors, scale=1)
-        inpainted_pcd.transform(pose_c[0, 0].numpy())
+        inpainted_pcd.transform(pose_c)
 
         self.scene_pcd += inpainted_pcd
         self.scene_pcd = self.scene_pcd.voxel_down_sample(voxel_size=0.005)
@@ -221,6 +222,7 @@ class DepthOutpainter:
         floor_pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(self.floor_points))
         floor_pcd.transform(self.camera_T_floor)
         floor_pcd.paint_uniform_color([0, 0, 0])
+        floor_pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.1, max_nn=30))
         _, rendered_floor_depth_np = self.render_pointcloud(floor_pcd, self.K, pose_c)
 
         semantic_seg = run_m2f_segmentation(self.args, np.array(inpainted_rgb_pil), './preprocess/')
