@@ -167,8 +167,8 @@ class DepthOutpainter:
 
         # Point cloud rendering
         # pose_c = pose_c[None, None]
-        if not self.scene_pcd.has_normals():
-            self.scene_pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.1, max_nn=30))
+        # if not self.scene_pcd.has_normals():
+        #     self.scene_pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.1, max_nn=30))
 
         rendered_rgb_np, rendered_depth_np = self.render_pointcloud(self.scene_pcd, self.K, pose_c)
         canvas = np.zeros(self.inpainting_size, dtype=rendered_rgb_np.dtype)
@@ -207,8 +207,14 @@ class DepthOutpainter:
         inpainted_pcd = get_o3d_pointcloud(inpainted_pts, inpainted_colors, scale=1)
         inpainted_pcd.transform(pose_c)
 
+        ori_normals = np.asarray(self.scene_pcd.normals)
         self.scene_pcd += inpainted_pcd
+        self.scene_pcd.estimate_normals(
+            search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.1, max_nn=30))
+        self.scene_pcd.orient_normals_towards_camera_location()
+        self.scene_pcd.normals = o3d.utility.Vector3dVector(np.vstack((ori_normals, np.asarray(self.scene_pcd.normals)[ori_normals.shape[0]:,:])))
         self.scene_pcd = self.scene_pcd.voxel_down_sample(voxel_size=0.005)
+        self.scene_pcd, _ = self.scene_pcd.remove_statistical_outlier(nb_neighbors=200, std_ratio=2.0)
         self.counter += 1
 
     def floor_grounding(self, inpainted_rgb_pil: Image.Image, rendered_depth_np: np.ndarray, pose_c: np.ndarray):
@@ -222,8 +228,12 @@ class DepthOutpainter:
         floor_pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(self.floor_points))
         floor_pcd.transform(self.camera_T_floor)
         floor_pcd.paint_uniform_color([0, 0, 0])
-        floor_pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.1, max_nn=30))
-        _, rendered_floor_depth_np = self.render_pointcloud(floor_pcd, self.K, pose_c)
+        plane_model, inliers = floor_pcd.segment_plane(distance_threshold=0.01,
+                                         ransac_n=3,
+                                         num_iterations=1000)
+        [a, b, c, d] = plane_model
+        floor_pcd.normals = o3d.utility.Vector3dVector(plane_model[:3][None,:].repeat(self.floor_points.shape[0],axis=0))
+        _, rendered_floor_depth_np = self.render_pointcloud(floor_pcd, self.K_torch, pose_c)
 
         semantic_seg = run_m2f_segmentation(self.args, np.array(inpainted_rgb_pil), './preprocess/')
         floor_seg = semantic_seg == self.floor_id
