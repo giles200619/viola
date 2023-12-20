@@ -7,6 +7,7 @@ from datetime import datetime
 import pyrender
 import trimesh
 from sklearn.neighbors import NearestNeighbors
+import copy
 
 from .model.iron_depth.predict_depth import predict_iron_depth, load_iron_depth_model
 from .model.pointersect.pointersect import PointersectInference
@@ -122,7 +123,7 @@ class DepthOutpainter:
                                        viewport_height=im_size[1])
         rgb, depth = r.render(scene)
         r.delete()
-        return rgb, depth
+        return rgb, depth, mesh
 
     def inpaint(self, rendered_image_pil, inpaint_mask_pil):
 
@@ -170,7 +171,7 @@ class DepthOutpainter:
         # if not self.scene_pcd.has_normals():
         #     self.scene_pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.1, max_nn=30))
 
-        rendered_rgb_np, rendered_depth_np = self.render_pointcloud(self.scene_pcd, self.K, pose_c)
+        rendered_rgb_np, rendered_depth_np, new_mesh = self.render_pointcloud(self.scene_pcd, self.K, pose_c)
         canvas = np.zeros(self.inpainting_size, dtype=rendered_rgb_np.dtype)
         canvas[:rendered_rgb_np.shape[0], :rendered_rgb_np.shape[1]] = rendered_rgb_np
         # rendered_rgb_pil = Image.fromarray((canvas * 255).astype(np.uint8))
@@ -206,12 +207,13 @@ class DepthOutpainter:
             self.K, inpainted_rgb_np, depth_estimated_np, mask=np.logical_and(depth_estimated_np > 0, mask_np_cropped))
         inpainted_pcd = get_o3d_pointcloud(inpainted_pts, inpainted_colors, scale=1)
         inpainted_pcd.transform(pose_c)
-
-        ori_normals = np.asarray(self.scene_pcd.normals)
+        
+        self.scene_pcd = new_mesh.sample_points_uniformly(len(self.scene_pcd.points))
+        ori_normals = copy.copy(np.asarray(self.scene_pcd.normals))
         self.scene_pcd += inpainted_pcd
         self.scene_pcd.estimate_normals(
             search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.1, max_nn=30))
-        self.scene_pcd.orient_normals_towards_camera_location()
+        #self.scene_pcd.orient_normals_towards_camera_location()
         self.scene_pcd.normals = o3d.utility.Vector3dVector(np.vstack((ori_normals, np.asarray(self.scene_pcd.normals)[ori_normals.shape[0]:,:])))
         self.scene_pcd = self.scene_pcd.voxel_down_sample(voxel_size=0.005)
         self.scene_pcd, _ = self.scene_pcd.remove_statistical_outlier(nb_neighbors=200, std_ratio=2.0)
@@ -233,7 +235,7 @@ class DepthOutpainter:
                                          num_iterations=1000)
         [a, b, c, d] = plane_model
         floor_pcd.normals = o3d.utility.Vector3dVector(plane_model[:3][None,:].repeat(self.floor_points.shape[0],axis=0))
-        _, rendered_floor_depth_np = self.render_pointcloud(floor_pcd, self.K_torch, pose_c)
+        _, rendered_floor_depth_np, _ = self.render_pointcloud(floor_pcd, self.K_torch, pose_c)
 
         semantic_seg = run_m2f_segmentation(self.args, np.array(inpainted_rgb_pil), './preprocess/')
         floor_seg = semantic_seg == self.floor_id
