@@ -25,7 +25,7 @@ We provide demo scripts in the next section to run VioLA on RGBD sequences as pr
 
 
 ### Quick start:
-For testing VioLA, we provide both RGBD and posed-RGB sample data. Download and unzip `viola_sample_data.zip`.<br />
+For testing VioLA, we provide both RGBD and posed-RGB sample data. [Download](https://drive.google.com/file/d/1nWZ2-ErGIrEEXe6k6zqkEZ0vHUiGH_pU/view?usp=sharing) and unzip `viola_sample_data.zip`.<br />
 #### To run posed-RGB sample data: <br />
 This script provides a minimal but faster example to test VioLA on RGB sequences tagged with ARCore poses. Note that this example does not estimate semantic point cloud but only aligns video scans to the LiDAR map. The gravity direction is estimated with ARCore API. <br />
 First modify the paths in `viola_posed_video.sh`:<br />
