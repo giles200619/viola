@@ -1,6 +1,6 @@
 # VioLA: Aligning Videos to 2D LiDAR Scans
 
-[Paper](https://arxiv.org/abs/2311.04783), [Project Page]([https://arxiv.org/abs/2311.04783](https://giles200619.github.io/viola/))
+[Paper](https://arxiv.org/abs/2311.04783), [Project Page](https://giles200619.github.io/viola/)
 
 Jun-Jee Chao*, Selim Engin*, Nikhil Chavan-Dafle, Bhoram Lee, Volkan Isler <br>
 (* equal contribution)
