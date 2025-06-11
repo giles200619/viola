@@ -3,10 +3,10 @@ efficientnet_pytorch
 imageio
 kornia==0.6.7
 matplotlib
-moviepy
+moviepy==1.0.3
 natsort
 numpy
-open3d==0.17.0
+open3d
 opencv-python==4.6.0.66
 Pillow==9.4.0
 plotly==5.15.0
@@ -18,7 +18,7 @@ trimesh
 scikit-image
 antialiased-cnns
 albumentations
-https://github.com/JamieWatson683/scikit-image/archive/single_mesh.zip
+#https://github.com/JamieWatson683/scikit-image/archive/single_mesh.zip
 shapely
 h5py
 submitit

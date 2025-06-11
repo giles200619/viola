@@ -5,7 +5,7 @@ We recommend creating a new virtual environment. After activating the virtual en
 ```
 conda create -n viola python=3.9
 conda activate viola
-conda install pytorch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 pytorch-cuda=11.8 -c pytorch -c nvidia
+conda install pytorch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1 pytorch-cuda=12.1 -c pytorch -c nvidia
 conda install -c fvcore -c iopath -c conda-forge fvcore iopath
 conda install pytorch3d -c pytorch3d
 conda install lightning -c conda-forge
@@ -16,7 +16,7 @@ pip install -r requirements.txt
 
 ### Thirdparty modules:
 #### Open3D
-VioLA uses the RGBD reconstruction pipeline from [Open3D](https://github.com/isl-org/Open3D) v0.17.0<br />
+VioLA uses the RGBD reconstruction pipeline from [Open3D](https://github.com/isl-org/Open3D) <br />
 Clone the Open3D repository and modify the `--open3d_path` in `preprocess/redwood_open3d_m2f.py` accordingly
 ```
 git clone https://github.com/isl-org/Open3D.git

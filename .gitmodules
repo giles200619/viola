@@ -1,6 +1,6 @@
 [submodule "simplerecon"]
 	path = simplerecon
-	url = https://gitlab.saicny.com/saic-ny/perception/simplerecon.git
+	url = https://github.com/giles200619/simplerecon.git
 [submodule "mask2former"]
 	path = mask2former
-	url = https://gitlab.saicny.com/saic-ny/perception/mask2former
+	url = https://github.com/giles200619/Mask2Former.git
