@@ -60,4 +60,14 @@ cd ..
 python run_redwood.py --data_path <path to viola_sample/redwood/loft_short> --lidar_path <path to viola_sample/redwood/loft_lidar_dense.mat>
 ```
 
-
+## Citing VioLA
+```
+@inproceedings{chao2024viola,
+  title={VioLA: Aligning Videos to 2D LiDAR Scans},
+  author={Chao, Jun-Jee and Engin, Selim and Chavan-Dafle, Nikhil and Lee, Bhoram and Isler, Volkan},
+  booktitle={2024 IEEE International Conference on Robotics and Automation (ICRA)},
+  pages={4021--4028},
+  year={2024},
+  organization={IEEE}
+}
+```
