@@ -1,6 +1,6 @@
-[submodule "Mask2Former"]
-	path = Mask2Former
-	url = https://github.com/giles200619/Mask2Former.git
 [submodule "simplerecon"]
 	path = simplerecon
 	url = https://github.com/giles200619/simplerecon.git
+[submodule "mask2former"]
+	path = mask2former
+	url = https://github.com/giles200619/mask2former.git
