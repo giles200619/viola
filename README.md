@@ -14,7 +14,7 @@ This repository contains source codes for the project [VioLA: Aligning Videos to
 To get started, clone the repository and initialize the submodules:
 
 ```
-git clone https://gitlab.saicny.com/saic-ny/perception/viola.git
+git clone https://github.com/giles200619/viola.git
 cd viola
 git submodule update --init --recursive
 ```
