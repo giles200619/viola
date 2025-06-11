@@ -1,11 +1,11 @@
 # VioLA: Aligning Videos to 2D LiDAR Scans
 
-[Paper](https://arxiv.org/abs/2311.04783)
+[Paper](https://arxiv.org/abs/2311.04783), [Project Page]([https://arxiv.org/abs/2311.04783](https://giles200619.github.io/viola/))
 
 Jun-Jee Chao*, Selim Engin*, Nikhil Chavan-Dafle, Bhoram Lee, Volkan Isler <br>
 (* equal contribution)
 
-This repository contains source codes for the project [VioLA: Aligning Videos to 2D LiDAR Scans](https://arxiv.org/abs/2311.04783), developed by Samsung AI Center - New York.
+This repository contains source codes for the project [VioLA: Aligning Videos to 2D LiDAR Scans](https://arxiv.org/abs/2311.04783).
 
 
 ![viola](assets/viola_overview.png)
