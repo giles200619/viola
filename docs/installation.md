@@ -3,7 +3,7 @@
 We recommend creating a new virtual environment. After activating the virtual environment, install pytorch, pytorch3d, lightning and other required packages:
 
 ```
-conda create -n viola python=3.9
+conda create -n viola python=3.10
 conda activate viola
 conda install pytorch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1 pytorch-cuda=12.1 -c pytorch -c nvidia
 conda install -c fvcore -c iopath -c conda-forge fvcore iopath
